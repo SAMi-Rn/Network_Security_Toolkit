@@ -1,4 +1,5 @@
 import scapy.all as scapy
+from scapy.layers.http import HTTPRequest, HTTPResponse
 
 
 def sniff(interface):
@@ -8,7 +9,9 @@ def sniff(interface):
 
 
 def process_packet(packet):
-    print(packet.show())
-
+    if packet.haslayer(HTTPRequest):
+        if packet.haslayer(scapy.Raw):
+            print(packet[scapy.Raw].load)
+        
 
 sniff("en0")

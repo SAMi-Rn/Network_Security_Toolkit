@@ -2,7 +2,7 @@
 # echo 1 > /proc/sys/net/ipv4/ip_forward
 # to deactivate the ip forwarding
 # echo 0 > /proc/sys/net/ipv4/ip_forward
-# or echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward if you get permission denied error
+# or sudo bash -c 'echo 0 > /proc/sys/net/ipv4/ip_forward'
 # to see the ip forwarding status
 # cat /proc/sys/net/ipv4/ip_forward
 # ---------------------------------------------------------------------------------------------------------------------

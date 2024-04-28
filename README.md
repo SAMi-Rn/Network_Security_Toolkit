@@ -9,7 +9,7 @@ This toolkit comprises three Python scripts that work in concert to perform netw
 
 - **ARP Spoofing**: Manipulates ARP tables to intercept traffic between a target IP and the router.
 - **DNS Spoofing**: Intercepts DNS requests and provides forged responses.
-- **HTTP Sniffing**: Captures HTTP packets to extract URLs and possible login credentials.
+- **Packet Sniffing**: Captures HTTP packets to extract URLs and possible login credentials.
 
 ## Getting Started
 
@@ -37,7 +37,7 @@ Each script should be run with the appropriate command-line arguments as follows
 
 1. **ARP Spoofing**: Target and router IP addresses are required.
 2. **DNS Spoofing**: Specify the target IP address for DNS redirection.
-3. **HTTP Sniffing**: Designate the network interface to listen on.
+3. **Packet Sniffing**: Designate the network interface to listen on.
 
 #### Examples for running each script are provided in their respective sections below.
 ## Scripts
@@ -51,10 +51,10 @@ python arp_spoof.py -t <target_ip> -r <router_ip>
 # dns_spoof.py
 python dns_spoof.py -t <target_ip>
 ```
-### 3. HTTP Sniffing
+### 3. Packet Sniffing
 ```sh
-# http_sniffer.py
-python http_sniffer.py -i <interface_name
+# packet_sniffer.py
+python packet_sniffer.py -i <interface_name>
 ```
 ## Notes
 - The toolkit is for educational purposes and should only be used on networks where you have permission to perform these actions.
